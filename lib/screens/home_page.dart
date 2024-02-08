@@ -1,4 +1,5 @@
 import 'package:ai_app/pallete.dart';
+import 'package:ai_app/widgets/feature_card.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       body: Column(
+        //Avatar
         children: [
           Stack(
             children: [
@@ -30,7 +32,7 @@ class _HomePageState extends State<HomePage> {
                       shape: BoxShape.circle),
                   height: 120,
                   width: 120,
-                  padding: const EdgeInsets.only(top: 4),
+                  margin: const EdgeInsets.only(top: 4),
                 ),
               ),
               Container(
@@ -42,6 +44,48 @@ class _HomePageState extends State<HomePage> {
                 ),
                 height: 123,
               ),
+            ],
+          ),
+          //Message
+          Container(
+            margin:
+                const EdgeInsets.symmetric(horizontal: 40).copyWith(top: 30),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            decoration: BoxDecoration(
+              border: Border.all(color: Pallete.borderColor),
+              borderRadius:
+                  BorderRadius.circular(20).copyWith(topLeft: Radius.zero),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Text(
+                "Good Morning! What can I do for you?",
+                style: TextStyle(
+                  color: Pallete.mainFontColor,
+                  fontSize: 25,
+                  fontFamily: 'Cera Pro',
+                ),
+              ),
+            ),
+          ),
+          //Suggestions list
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(top: 10, left: 22),
+            child: const Text(
+              'Here are a few commands',
+              style: TextStyle(
+                  color: Pallete.mainFontColor,
+                  fontSize: 20,
+                  fontFamily: 'Cera Pro',
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          //features list
+          const Column(
+            children: [
+              FeatureCard(color: Pallete.firstSuggestionBoxColor, headerText:'Chat GPT'),
             ],
           )
         ],
