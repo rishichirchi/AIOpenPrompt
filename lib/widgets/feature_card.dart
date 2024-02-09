@@ -20,23 +20,27 @@ class FeatureCard extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(15)),
         color: color,
       ),
-      child: Column(children: [
-        Text(
-          headerText,
-          style: const TextStyle(
-              color: Pallete.blackColor,
-              fontSize: 18,
-              fontFamily: 'Cera Pro',
-              fontWeight: FontWeight.bold),
-        ),
-        Text(
-          descriptionText,
-          style: const TextStyle(
-            color: Pallete.blackColor,
-            fontFamily: 'Cera Pro',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20).copyWith(left: 15),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(
+            headerText,
+            style: const TextStyle(
+                color: Pallete.blackColor,
+                fontSize: 18,
+                fontFamily: 'Cera Pro',
+                fontWeight: FontWeight.bold),
           ),
-        ),
-      ]),
+          const SizedBox(height: 4),
+          Text(
+            descriptionText,
+            style: const TextStyle(
+              color: Pallete.blackColor,
+              fontFamily: 'Cera Pro',
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }
