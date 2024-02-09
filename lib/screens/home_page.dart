@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
           //features list
           const Column(
             children: [
-              FeatureCard(color: Pallete.firstSuggestionBoxColor, headerText:'Chat GPT'),
+              FeatureCard(color: Pallete.firstSuggestionBoxColor, headerText:'Chat GPT', descriptionText: 'A smarter way to stay organized and informed with ChatGPT'),
             ],
           )
         ],

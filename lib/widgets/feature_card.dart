@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 class FeatureCard extends StatelessWidget {
   final Color color;
   final String headerText;
-  const FeatureCard({super.key, required this.color, required this.headerText});
+  final String descriptionText;
+  const FeatureCard(
+      {super.key,
+      required this.color,
+      required this.headerText,
+      required this.descriptionText});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,21 @@ class FeatureCard extends StatelessWidget {
         color: color,
       ),
       child: Column(children: [
-        Text(headerText, style: const TextStyle(color: Pallete.blackColor, fontSize: 18, fontFamily: 'Cera Pro', fontWeight: FontWeight.bold),),
+        Text(
+          headerText,
+          style: const TextStyle(
+              color: Pallete.blackColor,
+              fontSize: 18,
+              fontFamily: 'Cera Pro',
+              fontWeight: FontWeight.bold),
+        ),
+        Text(
+          descriptionText,
+          style: const TextStyle(
+            color: Pallete.blackColor,
+            fontFamily: 'Cera Pro',
+          ),
+        ),
       ]),
     );
   }
