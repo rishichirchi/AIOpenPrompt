@@ -66,7 +66,6 @@ class OpenAIService {
           "messages": messages,
         }),
       );
-      print(response.body);
 
       if (response.statusCode == 200) {
         String content =
@@ -101,24 +100,25 @@ class OpenAIService {
           'Authorization': 'Bearer $openAIAPIKey',
         },
         body: jsonEncode({
-          "model": "gpt-3.5-turbo",
-          "messages": messages,
+          "model": "dall-e-3",
+          "prompt": prompt,
+          "n": 1,
+          "size": "1024x1024"
         }),
       );
-      print(response.body);
 
       if (response.statusCode == 200) {
-        String content =
-            jsonDecode(response.body)['choices'][0]['message']['content'];
+        String imageURL =
+            jsonDecode(response.body)['data'][0]['url'];
 
-        content = content.trim();
+        imageURL= imageURL.trim();
 
         messages.add({
           'role': 'assistant',
-          'content': content,
+          'content': imageURL,
         });
 
-        return content;
+        return imageURL;
       }
       return 'An internal error occured!';
     } catch (e) {
