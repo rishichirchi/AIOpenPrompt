@@ -1,4 +1,5 @@
 import 'package:ai_app/pallete.dart';
+import 'package:ai_app/service/openai_service.dart';
 import 'package:ai_app/widgets/feature_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gap/flutter_gap.dart';
@@ -19,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   final SpeechToText speechToText = SpeechToText();
   var speechEnabled = false;
   String wordsSpoken = '';
+  String response = '';
+  final OpenAIService openAIService = OpenAIService();
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> stopListening() async {
+    response = await openAIService.isArtPromptAPI(wordsSpoken);
     await speechToText.stop();
     setState(() {});
   }
@@ -125,26 +129,27 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             //features list
-            const Column(
+             Column(
               children: [
-                FeatureCard(
+                const FeatureCard(
                   color: Pallete.firstSuggestionBoxColor,
                   headerText: 'Chat GPT',
                   descriptionText:
                       'A smarter way to stay organized and informed with ChatGPT',
                 ),
-                FeatureCard(
+                const FeatureCard(
                   color: Pallete.secondSuggestionBoxColor,
                   headerText: 'Dall-E',
                   descriptionText:
                       'Get inspired and stay creative with your presonal assitant powered by Dall-E',
                 ),
-                FeatureCard(
+                const FeatureCard(
                   color: Pallete.thirdSuggestionBoxColor,
                   headerText: 'Smart Voice Assistant',
                   descriptionText:
                       'Get the best of both worlds powered by ChatGPT and Dall-E',
                 ),
+                FeatureCard(color: Pallete.firstSuggestionBoxColor, headerText: response, descriptionText: response)
               ],
             ),
 
@@ -161,14 +166,16 @@ class _HomePageState extends State<HomePage> {
                         child: wordsSpoken == ''
                             ? const Text('...')
                             : Text(wordsSpoken,
-                                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
                   const Gap(5),
                   FloatingActionButton(
-                    onPressed:
-                        speechToText.isListening ? stopListening : startListening,
+                    onPressed: speechToText.isListening
+                        ? stopListening
+                        : startListening,
                     backgroundColor: Pallete.firstSuggestionBoxColor,
                     splashColor: Pallete.secondSuggestionBoxColor,
                     child: const Icon(Icons.mic),
