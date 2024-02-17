@@ -3,6 +3,7 @@ import 'package:ai_app/service/openai_service.dart';
 import 'package:ai_app/widgets/feature_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gap/flutter_gap.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -18,15 +19,29 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SpeechToText speechToText = SpeechToText();
+  final OpenAIService openAIService = OpenAIService();
+  final FlutterTts textToSpeech = FlutterTts();
+
   var speechEnabled = false;
   String wordsSpoken = '';
-  String response = '';
-  final OpenAIService openAIService = OpenAIService();
+  String? generatedContent;
+  String? generatedImageUrl;
 
   @override
   void initState() {
     super.initState();
     initSpeechToText();
+    initTextToSpeech();
+  }
+
+  Future<void> initTextToSpeech() async {
+    await textToSpeech.setSharedInstance(true);
+    setState(() {});
+  }
+
+  Future<void> systemSpeak(String content) async {
+    await textToSpeech.speak(content);
+    setState(() {});
   }
 
   Future<void> initSpeechToText() async {
@@ -40,7 +55,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> stopListening() async {
-    response = await openAIService.isArtPromptAPI(wordsSpoken);
     await speechToText.stop();
     setState(() {});
   }
@@ -48,6 +62,9 @@ class _HomePageState extends State<HomePage> {
   void onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       wordsSpoken = result.recognizedWords;
+      if (result.finalResult) {//as finalResult return true when the entire sentence has been completed.
+        openAIService.isArtPromptAPI(wordsSpoken);
+      }
     });
   }
 
@@ -55,6 +72,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     super.dispose();
     speechToText.stop();
+    textToSpeech.stop();
   }
 
   @override
@@ -102,55 +120,61 @@ class _HomePageState extends State<HomePage> {
                 borderRadius:
                     BorderRadius.circular(20).copyWith(topLeft: Radius.zero),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
-                  "Good Morning! What can I do for you?",
-                  style: TextStyle(
+                  generatedContent == null?
+                  "Good Morning! What can I do for you?": generatedContent!,
+                  style:  TextStyle(
                     color: Pallete.mainFontColor,
-                    fontSize: 25,
+                    fontSize:generatedContent==null? 25:28,
                     fontFamily: 'Cera Pro',
                   ),
                 ),
               ),
             ),
             //Suggestions list
-            Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.only(top: 10, left: 22),
-              child: const Text(
-                'Here are a few commands',
-                style: TextStyle(
-                    color: Pallete.mainFontColor,
-                    fontSize: 20,
-                    fontFamily: 'Cera Pro',
-                    fontWeight: FontWeight.bold),
+            Visibility(
+              visible: generatedContent == null,
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.only(top: 10, left: 22),
+                child: const Text(
+                  'Here are a few commands',
+                  style: TextStyle(
+                      color: Pallete.mainFontColor,
+                      fontSize: 20,
+                      fontFamily: 'Cera Pro',
+                      fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             //features list
-             Column(
-              children: [
-                const FeatureCard(
-                  color: Pallete.firstSuggestionBoxColor,
-                  headerText: 'Chat GPT',
-                  descriptionText:
-                      'A smarter way to stay organized and informed with ChatGPT',
-                ),
-                const FeatureCard(
-                  color: Pallete.secondSuggestionBoxColor,
-                  headerText: 'Dall-E',
-                  descriptionText:
-                      'Get inspired and stay creative with your presonal assitant powered by Dall-E',
-                ),
-                const FeatureCard(
-                  color: Pallete.thirdSuggestionBoxColor,
-                  headerText: 'Smart Voice Assistant',
-                  descriptionText:
-                      'Get the best of both worlds powered by ChatGPT and Dall-E',
-                ),
-                FeatureCard(color: Pallete.firstSuggestionBoxColor, headerText: response, descriptionText: response)
-              ],
+            Visibility(
+              visible: generatedContent == null,
+              child: const Column(
+                children: [
+                  FeatureCard(
+                    color: Pallete.firstSuggestionBoxColor,
+                    headerText: 'Chat GPT',
+                    descriptionText:
+                        'A smarter way to stay organized and informed with ChatGPT',
+                  ),
+                  FeatureCard(
+                    color: Pallete.secondSuggestionBoxColor,
+                    headerText: 'Dall-E',
+                    descriptionText:
+                        'Get inspired and stay creative with your presonal assitant powered by Dall-E',
+                  ),
+                  FeatureCard(
+                    color: Pallete.thirdSuggestionBoxColor,
+                    headerText: 'Smart Voice Assistant',
+                    descriptionText:
+                        'Get the best of both worlds powered by ChatGPT and Dall-E',
+                  ),
+                ],
+              ),
             ),
 
             Container(
@@ -173,12 +197,31 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const Gap(5),
                   FloatingActionButton(
-                    onPressed: speechToText.isListening
-                        ? stopListening
-                        : startListening,
+                    onPressed: () async {
+                      if (await speechToText.hasPermission &&
+                          speechToText.isNotListening) {
+                        await startListening();
+                      } else if (speechToText.isListening) {
+                        final speech =
+                            await openAIService.isArtPromptAPI(wordsSpoken);
+                        if (speech.contains('https')) {
+                          generatedImageUrl = speech;
+                          generatedContent = null;
+                          setState(() {});
+                        } else {
+                          generatedImageUrl = null;
+                          generatedContent = speech;
+                          setState(() {});
+                          await systemSpeak(speech);
+                        }
+                        await stopListening();
+                      } else {
+                        initSpeechToText();
+                      }
+                    },
                     backgroundColor: Pallete.firstSuggestionBoxColor,
                     splashColor: Pallete.secondSuggestionBoxColor,
-                    child: const Icon(Icons.mic),
+                    child: speechToText.isListening? const Icon(Icons.square):const Icon(Icons.mic),
                   ),
                 ],
               ),
