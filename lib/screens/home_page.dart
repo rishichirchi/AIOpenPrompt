@@ -1,6 +1,10 @@
 import 'package:ai_app/pallete.dart';
 import 'package:ai_app/widgets/feature_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gap/flutter_gap.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,6 +16,43 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final SpeechToText speechToText = SpeechToText();
+  var speechEnabled = false;
+  String wordsSpoken = '';
+
+  @override
+  void initState() {
+    super.initState();
+    initSpeechToText();
+  }
+
+  Future<void> initSpeechToText() async {
+    speechEnabled = await speechToText.initialize();
+    setState(() {});
+  }
+
+  Future<void> startListening() async {
+    await speechToText.listen(onResult: onSpeechResult);
+    setState(() {});
+  }
+
+  Future<void> stopListening() async {
+    await speechToText.stop();
+    setState(() {});
+  }
+
+  void onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      wordsSpoken = result.recognizedWords;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    speechToText.stop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,13 +147,35 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: FloatingActionButton(
-                onPressed: () {},
-                child: const Icon(Icons.mic),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Card(
+                      margin: const EdgeInsets.fromLTRB(10, 10, 3, 5),
+                      color: Pallete.firstSuggestionBoxColor,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: wordsSpoken == ''
+                            ? const Text('...')
+                            : Text(wordsSpoken,
+                                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                  const Gap(5),
+                  FloatingActionButton(
+                    onPressed:
+                        speechToText.isListening ? stopListening : startListening,
+                    backgroundColor: Pallete.firstSuggestionBoxColor,
+                    splashColor: Pallete.secondSuggestionBoxColor,
+                    child: const Icon(Icons.mic),
+                  ),
+                ],
               ),
-            ),
+            )
           ],
         ),
       ),
